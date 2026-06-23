@@ -14,8 +14,6 @@
  * ============================================================
  */
 
-// Global storage for last prediction (used by PDF generator)
-let lastPredictionData = null;
 
 /* ── Quick Example Data ──────────────────────────────────── */
 const EXAMPLES = {
@@ -267,10 +265,6 @@ function displayResult(data) {
   updateMaterials();
   saveHistory(data);
 
-  // Store for PDF generation
-  lastPredictionData = data;
-  const pdfBtn = document.getElementById("pdfBtn");
-  if (pdfBtn) pdfBtn.style.display = "inline-flex";
 
   showPanel(panelSuccess);
 }
@@ -562,9 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHistory();
   updateMaterials();
 
-  // Hide PDF button until after first prediction
-  const pdfBtn = document.getElementById("pdfBtn");
-  if (pdfBtn) pdfBtn.style.display = "none";
+
 
   // Show placeholder images if model plots don't exist
   document.querySelectorAll(".plot-img").forEach(img => {
@@ -577,107 +569,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* ── Generate PDF Report ─────────────────────────────── */
-window.generatePDF = function() {
-  if (!lastPredictionData) {
-    alert("Please run a prediction first before generating a report.");
-    return;
-  }
 
-  const d = lastPredictionData;
-  const cls = d.classification;
-  const val = d.validation;
-  const vol = parseFloat(document.getElementById("volume").value) || 1;
-
-  // Set date-time
-  document.getElementById("pdfDateTime").textContent = new Date().toLocaleString();
-
-  // Input parameters table
-  const inputLabels = [
-    ["Cement",           d.input_received.cement,      "kg/m³"],
-    ["Water",            d.input_received.water,       "L/m³"],
-    ["Blast Furnace Slag",d.input_received.slag,       "kg/m³"],
-    ["Fly Ash",          d.input_received.ash,         "kg/m³"],
-    ["Superplasticizer", d.input_received.superplastic,"kg/m³"],
-    ["Fine Aggregate",   d.input_received.fineagg,     "kg/m³"],
-    ["Coarse Aggregate", d.input_received.coarseagg,   "kg/m³"],
-    ["Curing Age",       d.input_received.age,         "days"],
-    ["Concrete Volume",  vol,                          "m³"]
-  ];
-
-  const inputTbody = document.getElementById("pdfInputTableBody");
-  inputTbody.innerHTML = "";
-  inputLabels.forEach(([label, val, unit], i) => {
-    inputTbody.innerHTML += `<tr style="${i%2===0?'background:#f8fafc;':''}"><td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${label}</td><td style="padding:6px 10px;border:1px solid #ddd;text-align:right;font-family:monospace;">${val}</td><td style="padding:6px 10px;border:1px solid #ddd;text-align:center;color:#666;">${unit}</td></tr>`;
-  });
-
-  // Prediction results
-  document.getElementById("pdfStrength").textContent  = d.predicted_strength + " MPa";
-  document.getElementById("pdfClass").textContent     = cls.label;
-  document.getElementById("pdfGrade").textContent     = cls.grade;
-  document.getElementById("pdfConfidence").textContent= d.confidence.percentage + "% (" + d.confidence.level + ")";
-  document.getElementById("pdfQuality").textContent   = d.quality_score + "/100";
-  document.getElementById("pdfWCRatio").textContent   = val.wc_ratio;
-  document.getElementById("pdfValidation").textContent= val.status.replace(/_/g, " ");
-
-  // Insights
-  const insightsList = document.getElementById("pdfInsightsList");
-  insightsList.innerHTML = "";
-  (d.insights || []).forEach(ins => {
-    insightsList.innerHTML += `<li style="margin-bottom:4px;">✓ ${ins}</li>`;
-  });
-  if (!d.insights || d.insights.length === 0) {
-    insightsList.innerHTML = "<li>No specific insights generated for this mix.</li>";
-  }
-
-  // Recommendations
-  document.getElementById("pdfRecommendation").textContent = cls.recommendation.replace(/[✅⚠️🏆]/g, "").trim();
-
-  // Material estimation
-  const cement  = parseFloat(d.input_received.cement)  || 0;
-  const water   = parseFloat(d.input_received.water)   || 0;
-  const fine    = parseFloat(d.input_received.fineagg)  || 0;
-  const coarse  = parseFloat(d.input_received.coarseagg)|| 0;
-  const cementKg   = (cement * vol).toFixed(0);
-  const cementBags = (cement * vol / 50).toFixed(1);
-  const waterL     = (water  * vol).toFixed(1);
-  const fineKg     = (fine   * vol).toFixed(0);
-  const coarseKg   = (coarse * vol).toFixed(0);
-
-  const matTbody = document.getElementById("pdfMaterialTableBody");
-  const matRows = [
-    ["Cement",           `${cementKg} kg  (≈ ${cementBags} bags)`, `${vol} m³`],
-    ["Water",            `${waterL} Liters`,                         `${vol} m³`],
-    ["Fine Aggregate (Sand)",  `${fineKg} kg`,                       `${vol} m³`],
-    ["Coarse Aggregate (Gravel)",`${coarseKg} kg`,                    `${vol} m³`]
-  ];
-  matTbody.innerHTML = "";
-  matRows.forEach(([label, qty, v], i) => {
-    matTbody.innerHTML += `<tr style="${i%2===0?'background:#fdf4ff;':''}"><td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;">${label}</td><td style="padding:6px 10px;border:1px solid #ddd;text-align:right;font-family:monospace;">${qty}</td><td style="padding:6px 10px;border:1px solid #ddd;text-align:right;color:#666;">${v}</td></tr>`;
-  });
-
-  // Reveal hidden template and render
-  const template = document.getElementById("pdfReportTemplate");
-  template.style.display = "block";
-  const element = document.getElementById("pdfContent");
-
-  const opt = {
-    margin:       [10, 10, 10, 10],
-    filename:     `Concrete_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-    image:        { type: "jpeg", quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-    jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
-  };
-
-  html2pdf()
-    .set(opt)
-    .from(element)
-    .save()
-    .then(() => {
-      template.style.display = "none";
-    })
-    .catch(err => {
-      template.style.display = "none";
-      console.error("PDF generation failed:", err);
-    });
-};
