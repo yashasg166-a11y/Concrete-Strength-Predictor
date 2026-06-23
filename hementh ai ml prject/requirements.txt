@@ -1,0 +1,20 @@
+# ============================================================
+# requirements.txt — Python dependencies
+# Concrete Compressive Strength Prediction Project
+# ============================================================
+
+# Web Framework
+flask==3.0.3
+flask-cors==4.0.1
+
+# Machine Learning & Data Science
+scikit-learn==1.5.2
+pandas==2.2.3
+numpy==1.26.4
+joblib==1.4.2
+
+# Plotting
+matplotlib==3.9.2
+
+# WSGI Server (for Render deployment)
+gunicorn==23.0.0

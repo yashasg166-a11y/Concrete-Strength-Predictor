@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concrete Strength Predictor | Civil Engineering AI/ML Project</title>
+  <meta name="description" content="AI-powered Concrete Compressive Strength Predictor using Machine Learning. Enter your concrete mix design to get instant strength predictions." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  <!-- html2pdf for PDF Report -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════ HERO & FORM ════════ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="floating-shapes">
+      <div class="shape s1"></div>
+      <div class="shape s2"></div>
+      <div class="shape s3"></div>
+      <div class="shape s4"></div>
+    </div>
+    <div class="hero-content" style="max-width: 1000px; width: 100%;">
+      <div class="hero-tag" style="background: rgba(14,165,233,.12); border: 1px solid rgba(14,165,233,.25); border-radius: 20px; color: var(--accent-cyan); padding: 6px 16px; font-weight: 600; font-size: 0.8rem; margin-bottom: 24px; display: inline-flex; align-items: center; gap: 8px;">
+        <span style="width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 8px var(--accent-cyan);"></span>
+        AI-POWERED · CONCRETE STRENGTH INTELLIGENCE
+      </div>
+      <h1 class="hero-title" style="margin-bottom: 40px;">
+        Concrete Strength Predictor
+      </h1>
+
+      <div class="hero-form-box" id="heroFormBox">
+        <form id="predictionForm" novalidate>
+            <div class="input-grid">
+
+              <!-- Cement -->
+              <div class="input-group">
+                <label for="cement" class="input-label" title="Cement (kg/m³) = kilograms of cement required for one cubic meter of concrete.">
+                  <span class="input-icon">🟫</span> Cement
+                  <span class="unit-badge">kg/m³</span>
+                </label>
+                <input type="number" id="cement" name="cement"
+                       placeholder="e.g., 350" min="100" max="800" step="0.1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 100–800 kg/m³</div>
+              </div>
+
+              <!-- Slag -->
+              <div class="input-group">
+                <label for="slag" class="input-label" title="Blast Furnace Slag (kg/m³) = by-product used as a supplementary cementitious material.">
+                  <span class="input-icon">⬛</span> Blast Furnace Slag
+                  <span class="unit-badge">kg/m³</span>
+                </label>
+                <input type="number" id="slag" name="slag"
+                       placeholder="e.g., 0" min="0" max="400" step="0.1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 0–400 kg/m³</div>
+              </div>
+
+              <!-- Fly Ash -->
+              <div class="input-group">
+                <label for="ash" class="input-label" title="Fly Ash (kg/m³) = coal combustion product used to improve workability and late strength.">
+                  <span class="input-icon">🔘</span> Fly Ash
+                  <span class="unit-badge">kg/m³</span>
+                </label>
+                <input type="number" id="ash" name="ash"
+                       placeholder="e.g., 0" min="0" max="300" step="0.1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 0–300 kg/m³</div>
+              </div>
+
+              <!-- Water -->
+              <div class="input-group">
+                <label for="water" class="input-label" title="Water (kg/m³) = Equivalent to Liters per cubic meter. Determines the water-cement ratio.">
+                  <span class="input-icon">💧</span> Water
+                  <span class="unit-badge">kg/m³ (Liters)</span>
+                </label>
+                <input type="number" id="water" name="water"
+                       placeholder="e.g., 162" min="100" max="300" step="0.1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 100–300 kg/m³</div>
+              </div>
+
+              <!-- Superplasticizer -->
+              <div class="input-group">
+                <label for="superplastic" class="input-label" title="Superplasticizer (kg/m³) = Chemical admixture to increase workability without adding water.">
+                  <span class="input-icon">🧪</span> Superplasticizer
+                  <span class="unit-badge">kg/m³</span>
+                </label>
+                <input type="number" id="superplastic" name="superplastic"
+                       placeholder="e.g., 2.5" min="0" max="40" step="0.1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 0–40 kg/m³</div>
+              </div>
+
+              <!-- Coarse Aggregate -->
+              <div class="input-group">
+                <label for="coarseagg" class="input-label" title="Coarse Aggregate (kg/m³) = Crushed stones or gravel providing structural bulk.">
+                  <span class="input-icon">🪨</span> Coarse Aggregate
+                  <span class="unit-badge">kg/m³</span>
+                </label>
+                <input type="number" id="coarseagg" name="coarseagg"
+                       placeholder="e.g., 1040" min="700" max="1200" step="0.1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 700–1200 kg/m³</div>
+              </div>
+
+              <!-- Fine Aggregate -->
+              <div class="input-group">
+                <label for="fineagg" class="input-label" title="Fine Aggregate (kg/m³) = Sand used to fill voids between coarse aggregates.">
+                  <span class="input-icon">🏖️</span> Fine Aggregate
+                  <span class="unit-badge">kg/m³</span>
+                </label>
+                <input type="number" id="fineagg" name="fineagg"
+                       placeholder="e.g., 676" min="500" max="1000" step="0.1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 500–1000 kg/m³</div>
+              </div>
+
+              <!-- Age -->
+              <div class="input-group">
+                <label for="age" class="input-label" title="Curing Age (days) = Duration for which concrete is allowed to cure before testing.">
+                  <span class="input-icon">📅</span> Curing Age
+                  <span class="unit-badge">days</span>
+                </label>
+                <input type="number" id="age" name="age"
+                       placeholder="e.g., 28" min="1" max="365" step="1"
+                       class="input-field" required />
+                <div class="input-hint">Range: 1–365 days</div>
+              </div>
+
+              <!-- Volume -->
+              <div class="input-group full-width">
+                <label for="volume" class="input-label" title="Total concrete volume needed for the project to calculate materials.">
+                  <span class="input-icon">📐</span> Required Concrete Volume
+                  <span class="unit-badge">m³</span>
+                </label>
+                <input type="number" id="volume" name="volume"
+                       placeholder="e.g., 5" min="0.1" step="0.1" value="1"
+                       class="input-field" />
+                <div class="input-hint">Used for Material Calculator</div>
+              </div>
+
+            </div><!-- end input-grid -->
+
+            <!-- Quick Fill Examples & Action Buttons inline -->
+            <div class="form-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+              <div class="quick-fills" style="margin: 0;">
+                <span class="qf-label">Quick pick:</span>
+                <button type="button" class="qf-btn" onclick="fillExample('M20')">M20</button>
+                <button type="button" class="qf-btn" onclick="fillExample('M25')">M25</button>
+                <button type="button" class="qf-btn" onclick="fillExample('M30')">M30</button>
+                <button type="button" class="qf-btn" onclick="fillExample('M40')">M40</button>
+              </div>
+
+              <div class="btn-row" style="margin: 0; display: flex; gap: 12px;">
+                <button type="button" class="btn-reset" id="resetBtn" style="padding: 10px 16px;">
+                  <span>↺</span> Reset
+                </button>
+                <button type="button" class="btn-reset" onclick="document.getElementById('historyModal').style.display='flex'" style="padding: 10px 16px;">
+                  <span>🕒</span> View History
+                </button>
+                <button type="submit" class="btn-predict-new" id="predictBtn">
+                  <span class="btn-icon">🔍</span>
+                  <span class="btn-text">Predict</span>
+                  <span class="btn-loader" id="btnLoader" style="display:none;">⏳</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Below Hero: Result Panel ── -->
+    <section class="section" id="resultsSection" style="padding-top: 0; display: none;">
+      <div class="container" style="max-width: 800px; margin: 0 auto;">
+        <div class="result-panel" id="resultPanel" style="margin-top: -60px; position: relative; z-index: 10;">
+
+          <!-- Loading state -->
+          <div class="result-loading" id="resultLoading" style="display:none;">
+            <div class="loader-ring"></div>
+            <p>Running ML model...</p>
+          </div>
+
+          <!-- Success state -->
+          <div class="result-success" id="resultSuccess" style="display:none;">
+            <div class="result-header">
+              <div class="result-label">Predicted Compressive Strength</div>
+            </div>
+            <div class="result-strength">
+              <span class="strength-value" id="strengthValue">—</span>
+              <span class="strength-unit">MPa</span>
+            </div>
+
+            <!-- Strength Gauge -->
+            <div class="gauge-container">
+              <div class="gauge-bar">
+                <div class="gauge-fill" id="gaugeFill"></div>
+                <div class="gauge-marker" id="gaugeMarker"></div>
+              </div>
+              <div class="gauge-labels">
+                <span>0</span>
+                <span>20</span>
+                <span>40</span>
+                <span>60</span>
+                <span>80+</span>
+              </div>
+            </div>
+
+            <!-- Classification Badge -->
+            <div class="classification-card" id="classCard">
+              <div class="class-header">
+                <span class="class-icon" id="classIcon">🟢</span>
+                <span class="class-label" id="classLabel">Normal Strength</span>
+                <span class="class-grade" id="classGrade">M20–M30</span>
+              </div>
+              <div class="class-usage" id="classUsage"></div>
+              <div class="class-rec" id="classRec"></div>
+            </div>
+
+            <!-- Mix Validation Alert + W/C Ratio Display -->
+            <div class="validation-card" id="validationCard">
+              <div class="val-header">
+                <span id="valIcon">✅</span> <strong id="valStatus">VALID MIX</strong>
+              </div>
+              <ul id="valMessages" class="val-messages"></ul>
+              <!-- W/C Ratio Row -->
+              <div class="wc-ratio-row">
+                <span class="wc-label">💧 Water-Cement Ratio:</span>
+                <span class="wc-value" id="wcRatioValue">—</span>
+                <span class="wc-badge" id="wcRatioBadge">—</span>
+              </div>
+            </div>
+
+            <!-- Quality & Confidence -->
+            <div class="score-grid">
+              <div class="score-card">
+                <div class="score-title">Mix Quality Score</div>
+                <div class="score-value" id="qualityScore">--/100</div>
+              </div>
+              <div class="score-card">
+                <div class="score-title">Model Confidence</div>
+                <div class="score-value" id="confidenceScore">--%</div>
+                <div class="score-subtitle" id="confidenceLevel">Medium</div>
+              </div>
+            </div>
+
+            <!-- Out of Dataset Warnings -->
+            <div class="ood-warnings" id="oodWarningsContainer" style="display:none; background: #fffbeeb3; border-left: 4px solid #f59e0b; padding: 12px 16px; margin-top: 16px; border-radius: 4px;">
+              <div style="font-weight: 700; color: #b45309; font-size: 0.9rem; margin-bottom: 6px;">⚠️ Out-of-Dataset Warning</div>
+              <ul id="oodWarningsList" style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #92400e;"></ul>
+            </div>
+
+            <!-- Engineering Insights -->
+            <div class="insights-card">
+              <div class="insights-title">💡 Engineering Insights</div>
+              <ul id="insightsList"></ul>
+            </div>
+
+            <!-- Generate PDF Button -->
+            <div style="text-align:center; margin-bottom: 14px;">
+              <button class="btn-pdf" id="pdfBtn" onclick="generatePDF()">
+                📄 Generate Prediction Report
+              </button>
+            </div>
+
+            <!-- Material Calculator -->
+            <div class="materials-card">
+              <div class="materials-title">🧱 Material Estimator (for <span id="matVolume">1</span> m³)</div>
+              <div class="materials-grid">
+                <div class="mat-item"><strong>Cement:</strong> <span id="matCement">--</span> Bags <small>(50kg/bag)</small></div>
+                <div class="mat-item"><strong>Water:</strong> <span id="matWater">--</span> Liters</div>
+                <div class="mat-item"><strong>Sand:</strong> <span id="matFine">--</span> kg</div>
+                <div class="mat-item"><strong>Gravel:</strong> <span id="matCoarse">--</span> kg</div>
+              </div>
+            </div>
+
+            <!-- Input Summary -->
+            <div class="input-summary" id="inputSummary">
+              <div class="summary-title">Input Summary</div>
+              <div class="summary-grid" id="summaryGrid"></div>
+            </div>
+          </div>
+
+          <!-- Error state -->
+          <div class="result-error" id="resultError" style="display:none;">
+            <div class="error-icon">⚠️</div>
+            <h3>Prediction Failed</h3>
+            <p id="errorMessage">Something went wrong. Please check your inputs and try again.</p>
+            <button class="btn-retry" onclick="document.getElementById('resultsSection').style.display='none';">Try Again</button>
+          </div>
+
+        </div><!-- end result-panel -->
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────── PROJECT INFO ── -->
+    <section class="section alt-section" id="projectInfo">
+      <div class="container">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <h2 class="section-title">About the Project</h2>
+          <p class="section-sub" style="margin: 0 auto;">Civil Engineering AI/ML Mini Project</p>
+        </div>
+        
+        <div class="dataset-grid" style="grid-template-columns: 1fr; max-width: 900px; margin: 0 auto;">
+          <div class="classification-ref">
+            <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px; font-size: 0.95rem; text-align: justify;">
+              This web application uses advanced Machine Learning techniques (Random Forest Regression) to accurately predict the 28-day compressive strength of high-performance concrete. By providing specific mix design proportions—including cement, blast furnace slag, fly ash, water, superplasticizer, coarse aggregate, and fine aggregate—engineers can rapidly prototype and validate concrete mixes without waiting for lengthy physical curing times.
+            </p>
+            <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem; text-align: justify;">
+              The underlying model was trained and rigorously validated on the renowned Yeh (1998) Concrete Compressive Strength dataset. It features built-in mix validation to check IS 456 standard water-binder ratios, automated Out-of-Dataset detection to warn users of extreme inputs, and real-time material estimation capabilities for practical site application.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  <!-- Prediction History Modal -->
+  <div class="modal-overlay" id="historyModal" onclick="if(event.target===this)this.style.display='none'" style="display:none;">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-icon">🕒</div>
+      <h3 class="modal-title">Prediction History</h3>
+      <div class="history-list" id="historyList" style="margin: 24px 0; max-height: 400px; overflow-y: auto;">
+        <div class="history-empty">No predictions yet. Run a prediction to save history.</div>
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button class="btn-clear-history" onclick="clearHistory()" id="clearHistoryBtn" style="display:none; margin:0; padding: 10px 20px;">Clear History</button>
+        <button class="modal-close-btn" onclick="document.getElementById('historyModal').style.display='none'" style="margin:0; width: auto; padding: 10px 24px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dataset Range Info Modal -->
+  <div class="modal-overlay" id="rangeModal" onclick="if(event.target===this)this.style.display='none'" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-icon">📊</div>
+      <h3 class="modal-title">Why Dataset Ranges Matter</h3>
+      <p class="modal-text">
+        This application was trained on real-world concrete mix data from the <strong>Yeh (1998) Concrete Dataset</strong>.
+        Machine learning models are most accurate when the input values fall <strong>within the range of training data</strong>.
+      </p>
+      <p class="modal-text">
+        If you enter values <strong>outside these ranges</strong>, the model is extrapolating beyond what it has learned,
+        which may result in unreliable predictions. The <em>Confidence Score</em> and <em>Out-of-Dataset warnings</em>
+        are automatically adjusted to reflect this.
+      </p>
+      <p class="modal-text" style="color: var(--accent-amber); font-weight: 600;">
+        ⚠️ Always verify extreme predictions with physical cube testing.
+      </p>
+      <button class="modal-close-btn" onclick="document.getElementById('rangeModal').style.display='none'">Got it ✔</button>
+    </div>
+  </div>
+
+  <!-- Hidden PDF Report Template -->
+  <div id="pdfReportTemplate" style="display:none;">
+    <div id="pdfContent" style="font-family: 'Inter', sans-serif; color: #1c1a18; background: #fff; padding: 40px; line-height: 1.6; max-width: 680px; margin: 0 auto;">
+      <!-- PDF Header -->
+      <div style="border-bottom: 3px solid #d97435; padding-bottom: 16px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h1 style="font-size: 18px; font-weight: 900; color: #d97435; margin: 0;">AI-Based Concrete Strength Prediction</h1>
+          <p style="margin: 4px 0 0; font-size: 12px; color: #a09080;">Mix Validation &amp; Material Estimation System</p>
+        </div>
+        <div style="text-align:right; font-size: 11px; color:#777;">
+          <div style="font-weight:700;">Generated:</div>
+          <div id="pdfDateTime">—</div>
+        </div>
+      </div>
+
+      <!-- Section: Input Parameters -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size:14px; background:#d97435; color:#fff; padding:6px 12px; border-radius:4px; margin:0 0 12px;">INPUT PARAMETERS</h2>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <thead><tr style="background:#f9f7f5;"><th style="padding:6px 10px; text-align:left; border:1px solid #ddd;">Parameter</th><th style="padding:6px 10px; text-align:right; border:1px solid #ddd;">Value</th><th style="padding:6px 10px; text-align:center; border:1px solid #ddd;">Unit</th></tr></thead>
+          <tbody id="pdfInputTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Section: Prediction Results -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size:14px; background:#5a9e76; color:#fff; padding:6px 12px; border-radius:4px; margin:0 0 12px;">PREDICTION RESULTS</h2>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <tbody>
+            <tr style="background:#f5faf7;"><td style="padding:7px 10px; border:1px solid #ddd; font-weight:700;">Predicted Strength</td><td style="padding:7px 10px; border:1px solid #ddd; text-align:right; font-weight:900; font-size:16px; color:#5a9e76;" id="pdfStrength">—</td></tr>
+            <tr><td style="padding:7px 10px; border:1px solid #ddd; font-weight:700;">Strength Classification</td><td style="padding:7px 10px; border:1px solid #ddd; text-align:right;" id="pdfClass">—</td></tr>
+            <tr><td style="padding:7px 10px; border:1px solid #ddd; font-weight:700;">Strength Grade</td><td style="padding:7px 10px; border:1px solid #ddd; text-align:right;" id="pdfGrade">—</td></tr>
+            <tr><td style="padding:7px 10px; border:1px solid #ddd; font-weight:700;">Model Confidence</td><td style="padding:7px 10px; border:1px solid #ddd; text-align:right;" id="pdfConfidence">—</td></tr>
+            <tr style="background:#f0fdf4;"><td style="padding:7px 10px; border:1px solid #ddd; font-weight:700;">Mix Quality Score</td><td style="padding:7px 10px; border:1px solid #ddd; text-align:right;" id="pdfQuality">—</td></tr>
+            <tr><td style="padding:7px 10px; border:1px solid #ddd; font-weight:700;">Water-Cement Ratio</td><td style="padding:7px 10px; border:1px solid #ddd; text-align:right;" id="pdfWCRatio">—</td></tr>
+            <tr style="background:#f0fdf4;"><td style="padding:7px 10px; border:1px solid #ddd; font-weight:700;">Mix Validation Status</td><td style="padding:7px 10px; border:1px solid #ddd; text-align:right;" id="pdfValidation">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Engineering Insights -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size:14px; background:#6366f1; color:#fff; padding:6px 12px; border-radius:4px; margin:0 0 12px;">ENGINEERING INSIGHTS</h2>
+        <ul id="pdfInsightsList" style="font-size:12px; margin:0; padding-left:20px; line-height:2;"></ul>
+      </div>
+
+      <!-- Section: Construction Recommendations -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size:14px; background:#f59e0b; color:#fff; padding:6px 12px; border-radius:4px; margin:0 0 12px;">CONSTRUCTION RECOMMENDATIONS</h2>
+        <p id="pdfRecommendation" style="font-size:12px; line-height:1.7; padding: 8px 12px; background:#fffbeb; border-radius:4px; border-left: 4px solid #f59e0b;"></p>
+      </div>
+
+      <!-- Section: Material Estimates -->
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size:14px; background:#c8b89a; color:#1c1a18; padding:6px 12px; border-radius:4px; margin:0 0 12px;">MATERIAL ESTIMATES (per m³)</h2>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <thead><tr style="background:#faf9f7;"><th style="padding:6px 10px; text-align:left; border:1px solid #ddd;">Material Group</th><th style="padding:6px 10px; text-align:right; border:1px solid #ddd;">Amount (kg/m³)</th></tr></thead>
+          <tbody id="pdfMatTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Disclaimer -->
+      <div style="margin-top: 30px; border-top:1px dashed #ddd; padding-top:16px; font-size:10px; color:#888; text-align:center;">
+        <p style="margin:0 0 4px;"><strong>Disclaimer:</strong> This prediction is based on machine learning models trained on historical mix data. It should be used for preliminary estimation and mix proportioning guidance only.</p>
+        <p style="margin:0; color:#d97435; font-weight:600;">Always perform physical trial mixes and compressive strength tests (IS 516) to verify concrete grade before structural application.</p>
+      </div>
+
+      <!-- PDF Footer -->
+      <div style="border-top: 2px solid #e2e8f0; margin-top: 24px; padding-top: 12px; text-align:center; font-size:10px; color:#999;">
+        Generated by AI-Based Concrete Strength Prediction System &nbsp;|&nbsp; Civil Engineering AI/ML Project &nbsp;|&nbsp; 4th Semester
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JavaScript -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
